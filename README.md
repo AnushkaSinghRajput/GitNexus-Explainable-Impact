@@ -1,193 +1,118 @@
-# GitNexus
+# ImpactLens
 
-<div align="center">
+**A clearer answer to “what might this code change affect?”**
 
-  <a href="https://trendshift.io/repositories/19809" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/19809" alt="abhigyanpatwari%2FGitNexus | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
+ImpactLens is a standalone, explainable impact-analysis project built on
+[GitNexus](https://github.com/abhigyanpatwari/GitNexus). It follows code
+relationships through a repository and shows the evidence behind each reported
+dependency and risk label. The CLI and MCP tool remain named `gitnexus` so the
+existing indexing and editor integrations continue to work.
 
-  <p>
-    <a href="https://discord.gg/MgJrmsqr62">
-      <img src="https://img.shields.io/discord/1477255801545429032?color=5865F2&logo=discord&logoColor=white" alt="Discord"/>
-    </a>
-    <a href="https://www.npmjs.com/package/gitnexus">
-      <img src="https://img.shields.io/npm/v/gitnexus.svg" alt="npm version"/>
-    </a>
-    <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/">
-      <img src="https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg" alt="License: PolyForm Noncommercial"/>
-    </a>
-    <a href="https://securityscorecards.dev/viewer/?uri=github.com/abhigyanpatwari/GitNexus">
-      <img src="https://api.securityscorecards.dev/projects/github.com/abhigyanpatwari/GitNexus/badge" alt="OpenSSF Scorecard"/>
-    </a>
-    <a href="https://github.com/abhigyanpatwari/GitNexus/actions/workflows/ci.yml">
-      <img src="https://github.com/abhigyanpatwari/GitNexus/actions/workflows/ci.yml/badge.svg" alt="CI Workflows"/>
-    </a>
-  </p>
-</div>
+`GRAPH PATHS` · `RISK DRIVERS` · `CALLS VS IMPORTS`
 
-GitNexus indexes a codebase into a knowledge graph of symbols, calls, dependencies
-and execution flows. Use it through your coding agent's MCP tools, the CLI, or a
-web graph explorer.
+## The problem
 
-[Quick start](#quick-start) · [Documentation](#documentation) ·
-[Web UI](https://gitnexus.vercel.app) · [Discord](https://discord.gg/MgJrmsqr62)
+A list of affected symbols is useful, but it leaves two review questions open:
 
-https://github.com/user-attachments/assets/172685ba-8e54-4ea7-9ad1-e31a3398da72
+1. **Why is this symbol in the result?** A caller two steps away should have a
+   trace back to the target.
+2. **Why is the risk HIGH or MEDIUM?** A reviewer should see the observed count
+   and threshold, and whether the direct fanout is made of calls or file imports.
 
-## Quick start
+GitNexus already builds the code graph and computes impact. This project adds
+an explanation layer to that existing walk. It does not claim that a graph edge
+proves a change will break a caller.
 
-Requires **Node.js 22.18+ on 22.x, or 24.11+**. See [platform requirements](gitnexus/README.md#requirements)
-for Linux and Windows native dependencies.
+## What the report adds
 
-```bash
-# Run from your repository root
-npx gitnexus analyze
+| Field | What it answers |
+| --- | --- |
+| `riskDrivers` | Which observed count crossed the threshold for the primary risk label? |
+| `evidenceBreakdown` | How many reached symbols came through `CALLS`, `IMPORTS`, and other relation types? |
+| `evidencePath` | Which representative chain connects this result to the target? |
 
-# Connect your editors once
-npx gitnexus setup
+For example, an exported interface with eight importing files produces a
+MEDIUM score under the existing rule, with a direct fanout of eight `IMPORTS`
+edges. A path can then show that the walk entered the interface's owning file
+before it reached a route file:
+
+```text
+Interface:Options --DEFINES (seed)-- File:options.ts <--IMPORTS-- File:route.ts
+Risk: MEDIUM
+Why: direct 8 ≥ 5
+Direct evidence: IMPORTS 8
 ```
 
-`analyze` builds the index, installs agent skills, registers Claude Code hooks,
-and writes `AGENTS.md` / `CLAUDE.md` context files. `setup` configures MCP for your
-editors. Use `gitnexus analyze --index-only` to index without those repository
-integration files.
+The `DEFINES (seed)` step is an internal expansion, not a dependency edge.
+`IMPORTS` shows that the route imports the file; it does **not** prove that the
+route uses `Options`. That distinction is the point of the report.
 
-For repeated use, install globally with `npm install -g gitnexus`.
-If installation fails, see [troubleshooting](gitnexus/README.md#troubleshooting).
+## How it works
 
-## What you can do
-
-| Task                                        | Tool             |
-| ------------------------------------------- | ---------------- |
-| Find code and related execution flows       | `query`          |
-| Inspect a symbol's callers and dependencies | `context`        |
-| Check what a change could affect            | `impact`         |
-| Trace a path between two symbols            | `trace`          |
-| Review the impact of a Git diff             | `detect_changes` |
-| Preview and apply a semantic rename         | `rename`         |
-
-Ask your agent questions such as “What calls this function?” or “What would this
-change affect?” Resolution depends on language support and available evidence;
-check reported ambiguity, index freshness and coverage limits.
-
-## Editor setup
-
-`gitnexus setup` detects Claude Code, Cursor, Codex, Antigravity, Factory Droid,
-OpenCode, CodeBuddy and Qoder. Windsurf requires manual MCP configuration.
-To select editors:
-
-```bash
-gitnexus setup -c cursor,codex
+```mermaid
+flowchart LR
+    A[Indexed symbols and relationships] --> B[GitNexus impact walk]
+    B --> C[One parent per reached symbol]
+    B --> D[Relation counts and risk inputs]
+    C --> E[Path for each returned page item]
+    D --> F[Risk drivers and evidence breakdown]
+    E --> G[CLI and MCP report]
+    F --> G
 ```
 
-See [editor setup](docs/editor-setup.md) for the support matrix, manual MCP
-configuration, hooks and plugin installation.
+The existing breadth-first walk chooses one deterministic edge for each reached
+symbol. ImpactLens keeps that edge's parent, reconstructs a path only for items
+on the returned page, and marks reversed upstream edges. The summary counts are
+available even when `summaryOnly` omits the symbol list. No new graph query is
+needed for the explanation.
 
-## Everyday commands
+## Try it from source
+
+Requires Node.js 22.18+ or 24.11+. Build the CLI from this repository:
 
 ```bash
-gitnexus analyze                 # Refresh the current repository's index
-gitnexus analyze --watch         # Reindex as local files change
-gitnexus query "authentication"  # Search the graph
-gitnexus impact UserService --direction upstream
-gitnexus status                  # Check index freshness
-gitnexus list                    # List indexed repositories
-gitnexus serve                   # Serve indexed repositories to the web UI
+npm ci --prefix gitnexus
+npm run build --prefix gitnexus
 ```
 
-For multiple concurrent agents, use one `gitnexus mcp --http --port 3111` server
-and connect clients to `http://127.0.0.1:3111/mcp`. See the
-[shared-server instructions](docs/cli-reference.md#multi-client-setups-use---http-not-stdio).
+Then, from the codebase you want to inspect, run the built CLI. Replace
+`/absolute/path/to/ImpactLens` with the location of this checkout:
 
-## Web UI
+```bash
+cd /path/to/codebase
+node /absolute/path/to/ImpactLens/gitnexus/dist/cli/index.js analyze --index-only
+node /absolute/path/to/ImpactLens/gitnexus/dist/cli/index.js impact UserService --direction upstream
+```
 
-Run `gitnexus serve`, then open [gitnexus.vercel.app](https://gitnexus.vercel.app).
-The UI connects to the backend to browse indexed repositories and use AI chat.
-It uses the existing index; no re-upload or re-index is needed.
+The same report fields are returned by the `impact` MCP tool after connecting
+the local GitNexus server. For the web graph explorer, start the backend with
+`npm run serve --prefix gitnexus`, then install and run the web client with
+`npm ci --prefix gitnexus-web` and `npm run dev --prefix gitnexus-web`.
 
-<img width="1280" alt="GitNexus graph explorer" src="https://github.com/user-attachments/assets/cc5d637d-e0e5-48e6-93ff-5bcfdb929285" />
+## Verification
 
-For Docker, hosted deployments, image verification, or a local frontend, see
-[deployment](docs/deployment.md).
+The change adds unit tests for threshold explanations and path reconstruction,
+plus database-backed cases for a direct caller, a transitive caller, and an
+interface reached through its owning file. The broader impact suite currently
+passes **779 tests across 37 files**. See
+[the design note](docs/fork/explainable-impact.md) for output details and known
+limits.
 
-## Supported languages
+## Scope and limits
 
-C, C++, C#, COBOL, Dart, Go, Java, JavaScript, Kotlin, Objective-C, PHP, Python,
-Ruby, Rust, Swift, TypeScript, Vue and Zig have registered providers. Support
-varies by construct; see the [language inventories](docs/languages/README.md)
-for measured behavior, exclusions and remaining gaps.
+- A path is one deterministic **witness**, not every possible route through the
+  graph.
+- A file import is weaker evidence than direct symbol use. The existing risk
+  formula is unchanged; the report makes its inputs visible.
+- Missing or truncated graph information is still governed by GitNexus's
+  `partial`, `epistemic`, `riskScale`, and `riskNote` warnings.
+- The visual identity in the web client is customized for this repository. The
+  CLI package name, data model, and analysis engine remain GitNexus-compatible.
 
-## Documentation
+## Origin and license
 
-<a id="cli-reference"></a>
-<a id="environment-variables"></a>
-<a id="vector-cutoff-tuning"></a>
-
-| Read                                                                                                                               | For                                                                   |
-| ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| [CLI reference](docs/cli-reference.md)                                                                                             | Commands, indexing flags, watch mode, configuration and shared stores |
-| [Environment variables](docs/cli-reference.md#environment-variables) · [vector tuning](docs/cli-reference.md#vector-cutoff-tuning) | Runtime settings and search tuning                                    |
-| [MCP reference](docs/mcp-reference.md)                                                                                             | All tools, resources, examples, policies and response budgets         |
-| [Editor setup](docs/editor-setup.md)                                                                                               | Supported integrations and manual configuration                       |
-| [Deployment](docs/deployment.md)                                                                                                   | Docker, Render, image signatures and local frontend setup             |
-| [Wiki generation](docs/wiki-generation.md)                                                                                         | Model configuration and generated repository documentation            |
-| [Runbook](RUNBOOK.md)                                                                                                              | Index recovery, embeddings and operational troubleshooting            |
-| [Architecture](ARCHITECTURE.md) · [type resolution](type-resolution-system.md)                                                     | How the indexer and resolution layers work                            |
-| [Type-resolution roadmap](type-resolution-roadmap.md)                                                                              | Planned work and acceptance criteria                                  |
-
-## Security and privacy
-
-The CLI indexes code locally without an LLM. Optional remote embeddings, wiki
-generation and AI chat use the providers you configure. The web UI accesses the
-backend it connects to. Review [security guidance](SECURITY.md) and
-[deployment authentication](docs/deployment.md#deploy-to-render) before exposing
-an index to other users.
-
-## Development
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and pull requests,
-[TESTING.md](TESTING.md) for validation, and [GUARDRAILS.md](GUARDRAILS.md) for
-repository rules.
-
-## Enterprise
-
-GitNexus is available as an **enterprise offering** — fully managed **SaaS** or **self-hosted** deployment. Commercial use of the OSS version is also available with proper licensing.
-
-Enterprise includes:
-
-- **PR Review** — automated blast radius analysis on pull requests
-- **Auto-updating Code Wiki** — always up-to-date documentation (Code Wiki is also available in OSS)
-- **Auto-reindexing** — knowledge graph stays fresh automatically
-- **Multi-repo support** — unified graph across repositories
-- **OCaml support** — additional language coverage
-- **Priority feature/language support** — request new languages or features
-
-**Upcoming:** auto regression forensics · end-to-end test generation
-
-👉 Learn more at [akonlabs.com](https://akonlabs.com) — for commercial licensing or enterprise inquiries, ping us on [Discord](https://discord.gg/AAsRVT6fGb) or email founders@akonlabs.com
-
-## Community Integrations
-
-Built by the community — not officially maintained, but worth checking out.
-
-| Project                                                                       | Author                                                 | Description                                                             |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------------------------------- |
-| [pi-gitnexus](https://github.com/tintinweb/pi-gitnexus)                       | [@tintinweb](https://github.com/tintinweb)             | GitNexus plugin for [pi](https://pi.dev) — `pi install npm:pi-gitnexus` |
-| [gitnexus-stable-ops](https://github.com/ShunsukeHayashi/gitnexus-stable-ops) | [@ShunsukeHayashi](https://github.com/ShunsukeHayashi) | Stable ops & deployment workflows (Miyabi ecosystem)                    |
-| [KiloCode MCP workflow](Documentation/kilo-code-mcp.md)                       | [@oktanishq](https://github.com/oktanishq)             | Guide to connect GitNexus MCP to Kilo Code and verify tools.            |
-
-> Have a project built on GitNexus? Open a PR to add it here!
-
-## License
-
-[PolyForm Noncommercial 1.0.0](LICENSE). Commercial licensing is available through
-[akonlabs.com](https://akonlabs.com).
-
-## Acknowledgments
-
-- [Tree-sitter](https://tree-sitter.github.io/) — AST parsing
-- [LadybugDB](https://ladybugdb.com/) — embedded graph database with vector support (formerly KuzuDB)
-- [Sigma.js](https://www.sigmajs.org/) — WebGL graph rendering
-- [transformers.js](https://huggingface.co/docs/transformers.js) — browser ML
-- [Graphology](https://graphology.github.io/) — graph data structures
-- [MCP](https://modelcontextprotocol.io/) — Model Context Protocol
+This is a standalone derivative based on
+[`abhigyanpatwari/GitNexus`](https://github.com/abhigyanpatwari/GitNexus) at
+commit `ea97d6d`. GitNexus was created by Abhigyan Patwari and contributors.
+Their history and the original **PolyForm Noncommercial 1.0.0** license are
+retained. ImpactLens is not an official GitNexus release.

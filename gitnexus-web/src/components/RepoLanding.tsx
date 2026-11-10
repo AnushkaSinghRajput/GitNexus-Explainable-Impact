@@ -110,7 +110,7 @@ export const RepoLanding = ({ repos, onSelectRepo, onAnalyzeComplete }: RepoLand
           <div className="mb-2 inline-flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-accent/70" />
             <span className="text-[11px] font-medium tracking-widest text-accent/80 uppercase">
-              GitNexus
+              IMPACTLENS / CODE MAP
             </span>
           </div>
 

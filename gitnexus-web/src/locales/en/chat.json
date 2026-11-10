@@ -1,6 +1,6 @@
 {
   "tabs": {
-    "chat": "Nexus AI",
+    "chat": "ImpactLens AI",
     "processes": "Processes"
   },
   "suggestions": {
@@ -34,7 +34,7 @@
   },
   "roles": {
     "you": "You",
-    "assistant": "Nexus AI"
+    "assistant": "ImpactLens AI"
   },
   "newBadge": "NEW"
 }

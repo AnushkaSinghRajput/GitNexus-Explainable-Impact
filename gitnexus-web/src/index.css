@@ -5,24 +5,24 @@
 ═══════════════════════════════════════════════════════════════ */
 @theme {
   /* Backgrounds */
-  --color-void: #06060a;
-  --color-deep: #0a0a10;
-  --color-surface: #101018;
-  --color-elevated: #16161f;
-  --color-hover: #1c1c28;
+  --color-void: #071116;
+  --color-deep: #0b1920;
+  --color-surface: #102129;
+  --color-elevated: #173039;
+  --color-hover: #1c3a43;
 
   /* Borders */
-  --color-border-subtle: #1e1e2a;
-  --color-border-default: #2a2a3a;
+  --color-border-subtle: #203740;
+  --color-border-default: #31505a;
 
   /* Text */
-  --color-text-primary: #e4e4ed;
-  --color-text-secondary: #8888a0;
-  --color-text-muted: #5a5a70;
+  --color-text-primary: #eef8f6;
+  --color-text-secondary: #a4c2c5;
+  --color-text-muted: #78969d;
 
   /* Accent */
-  --color-accent: #7c3aed;
-  --color-accent-dim: #5b21b6;
+  --color-accent: #43d4bf;
+  --color-accent-dim: #187d81;
 
   /* Node colors */
   --color-node-file: #3b82f6;
@@ -34,8 +34,8 @@
   --color-node-method: #14b8a6;
 
   /* Fonts */
-  --font-sans: 'Outfit', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Fira Code', monospace;
 
   /* Animations */
   --animate-breathe: breathe 3s ease-in-out infinite;
@@ -45,21 +45,21 @@
   --animate-fade-in: fade-in 0.3s ease-out;
 
   /* Box shadows */
-  --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.4);
-  --shadow-glow-soft: 0 0 40px rgba(124, 58, 237, 0.15);
+  --shadow-glow: 0 0 20px rgba(67, 212, 191, 0.35);
+  --shadow-glow-soft: 0 0 40px rgba(67, 212, 191, 0.14);
 }
 
 /* Keyframes */
 @keyframes breathe {
   0%,
   100% {
-    border-color: #2a2a3a;
-    box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.3);
+    border-color: #31505a;
+    box-shadow: 0 0 0 0 rgba(67, 212, 191, 0.24);
   }
 
   50% {
-    border-color: #7c3aed;
-    box-shadow: 0 0 40px 10px rgba(124, 58, 237, 0.3);
+    border-color: #43d4bf;
+    box-shadow: 0 0 40px 10px rgba(67, 212, 191, 0.24);
   }
 }
 
@@ -67,12 +67,12 @@
   0%,
   100% {
     transform: scale(1);
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 40px rgba(67, 212, 191, 0.35);
   }
 
   50% {
     transform: scale(1.1);
-    box-shadow: 0 0 80px rgba(124, 58, 237, 0.6);
+    box-shadow: 0 0 80px rgba(67, 212, 191, 0.5);
   }
 }
 
@@ -144,12 +144,43 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ImpactLens mark: a focused point inside a code-impact ring. */
+.impact-mark {
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(67, 212, 191, 0.55);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1e5960, #12363f 65%, #0b242d);
+  box-shadow: 0 0 18px rgba(67, 212, 191, 0.16);
+}
+
+.impact-mark::before {
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid #94f4e4;
+  border-radius: 50%;
+  content: '';
+}
+
+.impact-mark::after {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f1fff9;
+  content: '';
+}
+
 /* ═══════════════════════════════════════════════════════════════
    CUSTOM SCROLLBAR
 ═══════════════════════════════════════════════════════════════ */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: #2a2a3a #0a0a10;
+  scrollbar-color: #31505a #0b1920;
 }
 
 .scrollbar-thin::-webkit-scrollbar {

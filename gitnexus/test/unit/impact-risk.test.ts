@@ -44,6 +44,7 @@ describe('scoreImpactRisk', () => {
     expect(file).toEqual({
       risk: 'MEDIUM',
       riskSharedAxes: 'MEDIUM',
+      riskDrivers: [{ axis: 'direct', observed: 13, threshold: 5 }],
       riskScale: {
         comparableAcrossKinds: false,
         unusedAxes: fileUnusedAxes,
@@ -52,6 +53,7 @@ describe('scoreImpactRisk', () => {
     expect(fn).toEqual({
       risk: 'HIGH',
       riskSharedAxes: 'LOW',
+      riskDrivers: [{ axis: 'processes', observed: 4, threshold: 3 }],
       riskScale: {
         comparableAcrossKinds: true,
         unusedAxes: [],
@@ -60,7 +62,10 @@ describe('scoreImpactRisk', () => {
   });
 
   it('preserves UNKNOWN only for an empty upstream walk', () => {
-    expect(scoreImpactRisk({ ...base, impactedCount: 0 }).risk).toBe('UNKNOWN');
+    expect(scoreImpactRisk({ ...base, impactedCount: 0 })).toMatchObject({
+      risk: 'UNKNOWN',
+      riskDrivers: [],
+    });
     expect(scoreImpactRisk({ ...base, direction: 'downstream', impactedCount: 0 }).risk).toBe(
       'LOW',
     );
@@ -133,6 +138,9 @@ describe('scoreImpactRisk', () => {
     });
 
     expect(scored.risk).toBe('CRITICAL');
+    expect(scored.riskDrivers).toEqual([
+      { axis: 'processes', observed: 5, threshold: 5 },
+    ]);
     expect(scored.riskSharedAxes).toBe('LOW');
     expect(scored.riskScale.comparableAcrossKinds).toBe(false);
   });

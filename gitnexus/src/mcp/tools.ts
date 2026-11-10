@@ -559,9 +559,12 @@ RISK: risk is the HIGH/CRITICAL edit-gate field: LOW/MEDIUM/HIGH/CRITICAL/UNKNOW
 - riskSharedAxes compares direct/total axes; group mode adds the cross-repo crossing overlay. Never substitute it for \`risk\` when deciding whether to warn.
 - File targets lack process/community axes; their risk is not directly comparable with symbols. Web Graph-RAG expands Files to symbols.
 - riskScale.{comparableAcrossKinds,unusedAxes} identifies unavailable/skipped/failed axes, including IMPACT_MAX_CHUNKS=0 and enrichment that sampled a subset of impacted symbols. Failed/truncated counts are floors: known HIGH/CRITICAL warnings survive; otherwise risk is UNKNOWN.
+- riskDrivers lists the observed count and threshold that triggered the primary risk label; it is empty for LOW/UNKNOWN. It does not establish that a change will break callers.
+- evidenceBreakdown counts direct and all reached symbols by their selected relation type, including in summaryOnly. It reveals IMPORTS-heavy fanout but does not change risk or enumerate alternative edges.
 
 RESULTS: target, impactedCount, summary, affected_processes, affected_modules, byDepthCounts, and byDepth. summaryOnly omits byDepth. limit/offset apply PER DEPTH; maxDepth alone cannot bound wide hubs. Read pagination/truncated flags and totals before treating a page as complete. Ambiguous targets return ranked candidates, totalCandidates, and candidatesTruncated.
 - byDepth rows include processes:[{id,label,processType,step}]. With partial:true, processes:[] can mean capped enrichment; cross-check affected_processes.
+- byDepth rows include evidencePath:[{fromId,toId,relationType,reversed?,implicitSeed?}], one representative graph path from the target. reversed:true means the graph edge points from toId to fromId. implicitSeed marks an internal type/file/member expansion, not a dependency edge. Paths are returned only for the current page.
 - staticGated:true marks a provably compile-time-unreachable edge (currently Zig); absence proves neither reachability nor coverage. Traversal/risk do not filter on it.
 - affected_routes and row routes:[{url,method?}] are callgraph-only HTTP enrichment, not risk inputs.
 

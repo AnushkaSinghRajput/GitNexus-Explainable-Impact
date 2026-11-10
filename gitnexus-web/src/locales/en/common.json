@@ -1,7 +1,7 @@
 {
   "app": {
-    "name": "GitNexus",
-    "nexusAI": "Nexus AI"
+    "name": "ImpactLens",
+    "nexusAI": "ImpactLens AI"
   },
   "updateBanner": "GitNexus {{latest}} is available — this server runs {{installed}}.",
   "updateBannerDismiss": "Dismiss update notification",

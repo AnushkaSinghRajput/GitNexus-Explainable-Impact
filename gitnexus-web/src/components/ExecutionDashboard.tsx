@@ -348,7 +348,7 @@ export const ExecutionDashboard = () => {
       <header className="border-b border-border-subtle bg-deep/90 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-xs tracking-[0.2em] text-accent uppercase">GitNexus</div>
+            <div className="text-xs tracking-[0.2em] text-accent uppercase">ImpactLens</div>
             <h1 className="text-lg font-semibold">Execution Ops</h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">

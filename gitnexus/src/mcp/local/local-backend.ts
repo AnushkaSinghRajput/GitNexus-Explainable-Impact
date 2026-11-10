@@ -42,6 +42,11 @@ import { queryClassBeanMetadata } from './bean-metadata.js';
 import { GUARD_TAINT_LIMITATION } from '../taint-limitations.js';
 import { querySpringAopMetadata } from './aop-metadata.js';
 import {
+  buildImpactEvidencePath,
+  summarizeImpactEvidence,
+  type ImpactEvidenceStep,
+} from '../impact-evidence.js';
+import {
   SYMBOL_IDENTITY_RECOVERY_SUGGESTION,
   SymbolIdentityError,
   assertSymbolIdentity,
@@ -8863,6 +8868,13 @@ export class LocalBackend {
     void aopMetadataPromise.catch(() => undefined);
     const impacted: any[] = [];
     const visited = new Set<string>([symId]);
+    const recordEvidencePaths = !summaryOnly && !skipPerSymbolEnrichment;
+    const evidenceParent = new Map<string, ImpactEvidenceStep>();
+    const recordSeed = (id: string, relationType: string) => {
+      if (recordEvidencePaths) {
+        evidenceParent.set(id, { fromId: symId, toId: id, relationType, implicitSeed: true });
+      }
+    };
     const pdgBridgeEvidenceById = new Map<string, PdgBridgeEvidenceInfo>();
     let frontier = [symId];
     const objectCallableFrontier: string[] = [];
@@ -8932,6 +8944,7 @@ export class LocalBackend {
           if (rid && !visited.has(rid)) {
             visited.add(rid);
             frontier.push(rid);
+            recordSeed(rid, 'HAS_METHOD');
           }
         }
         for (const r of fileRows) {
@@ -8955,6 +8968,7 @@ export class LocalBackend {
           if (rid && !visited.has(rid)) {
             visited.add(rid);
             frontier.push(rid);
+            recordSeed(rid, 'DEFINES');
           }
         }
 
@@ -8980,6 +8994,7 @@ export class LocalBackend {
           if (rid && !visited.has(rid)) {
             visited.add(rid);
             frontier.push(rid);
+            recordSeed(rid, 'DECLARED_TYPE');
           }
         }
       } catch (e) {
@@ -9031,6 +9046,7 @@ export class LocalBackend {
           if (memberId && !visited.has(memberId)) {
             visited.add(memberId);
             objectCallableFrontier.push(memberId);
+            recordSeed(memberId, 'HAS_METHOD');
             impacted.push({
               depth: 1,
               id: memberId,
@@ -9221,6 +9237,14 @@ export class LocalBackend {
         for (const edge of [...bestEdgeByNode.values()].sort(compareImpactFrontierEdges)) {
           visited.add(edge.id);
           nextFrontier.push(edge.id);
+          if (recordEvidencePaths) {
+            evidenceParent.set(edge.id, {
+              fromId: edge.sourceId,
+              toId: edge.id,
+              relationType: edge.relType,
+              ...(direction === 'upstream' ? { reversed: true as const } : {}),
+            });
+          }
           const storedConfidence = edge.confidence;
           const relationType = edge.relType;
           // Prefer the stored confidence from the graph (set at analysis time);
@@ -9702,6 +9726,7 @@ export class LocalBackend {
     const {
       risk: scoredRisk,
       riskSharedAxes: scoredSharedAxes,
+      riskDrivers: scoredRiskDrivers,
       riskScale,
     } = scoreImpactRisk({
       direction,
@@ -9757,8 +9782,10 @@ export class LocalBackend {
       },
       direction,
       impactedCount: impacted.length,
+      evidenceBreakdown: summarizeImpactEvidence(impacted),
       risk,
       riskSharedAxes,
+      riskDrivers: risk === 'UNKNOWN' ? [] : scoredRiskDrivers,
       riskScale,
       ...(risk === 'UNKNOWN'
         ? {
@@ -9882,8 +9909,13 @@ export class LocalBackend {
     }
 
     // Attach processes field to each paginated item.
+    // Reconstruct only the returned page. The parent map retains one stable
+    // witness per reached node, including the implicit seeds used for types.
     for (const items of Object.values(paginatedGrouped)) {
       for (const it of items) {
+        if (recordEvidencePaths) {
+          it.evidencePath = buildImpactEvidencePath(symId, String(it.id), evidenceParent);
+        }
         it.processes = perSymbolProcesses.get(String(it.id)) ?? [];
         const routes = routesById.get(String(it.id));
         if (routes) it.routes = routes;

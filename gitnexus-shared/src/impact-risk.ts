@@ -26,10 +26,43 @@ export interface ImpactRiskInput {
 export interface ImpactRiskResult {
   risk: ImpactRisk;
   riskSharedAxes: ImpactRisk;
+  /** Thresholds that produced the primary risk label. Empty for LOW/UNKNOWN. */
+  riskDrivers: readonly ImpactRiskDriver[];
   riskScale: {
     comparableAcrossKinds: boolean;
     unusedAxes: readonly UnusedImpactRiskAxis[];
   };
+}
+
+export interface ImpactRiskDriver {
+  axis: 'direct' | 'processes' | 'modules' | 'impacted';
+  observed: number;
+  threshold: number;
+}
+
+const RISK_THRESHOLDS = {
+  CRITICAL: { direct: 30, processes: 5, modules: 5, impacted: 200 },
+  HIGH: { direct: 15, processes: 3, modules: 3, impacted: 100 },
+  MEDIUM: { direct: 5, impacted: 30 },
+} as const;
+
+function driversAtLevel(
+  input: Pick<ImpactRiskInput, 'directCount' | 'processCount' | 'moduleCount' | 'impactedCount'>,
+  level: 'CRITICAL' | 'HIGH' | 'MEDIUM',
+): ImpactRiskDriver[] {
+  const observed = {
+    direct: input.directCount,
+    processes: input.processCount,
+    modules: input.moduleCount,
+    impacted: input.impactedCount,
+  };
+  return Object.entries(RISK_THRESHOLDS[level])
+    .filter(([axis, threshold]) => observed[axis as keyof typeof observed] >= threshold)
+    .map(([axis, threshold]) => ({
+      axis: axis as ImpactRiskDriver['axis'],
+      observed: observed[axis as keyof typeof observed],
+      threshold,
+    }));
 }
 
 function score(
@@ -38,16 +71,16 @@ function score(
     'direction' | 'directCount' | 'processCount' | 'moduleCount' | 'impactedCount'
   >,
 ): ImpactRisk {
-  const { direction, directCount, processCount, moduleCount, impactedCount } = input;
+  const { direction, impactedCount } = input;
 
   if (direction === 'upstream' && impactedCount === 0) return 'UNKNOWN';
-  if (directCount >= 30 || processCount >= 5 || moduleCount >= 5 || impactedCount >= 200) {
+  if (driversAtLevel(input, 'CRITICAL').length > 0) {
     return 'CRITICAL';
   }
-  if (directCount >= 15 || processCount >= 3 || moduleCount >= 3 || impactedCount >= 100) {
+  if (driversAtLevel(input, 'HIGH').length > 0) {
     return 'HIGH';
   }
-  if (directCount >= 5 || impactedCount >= 30) return 'MEDIUM';
+  if (driversAtLevel(input, 'MEDIUM').length > 0) return 'MEDIUM';
   return 'LOW';
 }
 
@@ -127,7 +160,8 @@ const INCOMPLETE_SAMPLE_REASONS: ReadonlySet<UnusedImpactRiskReason> = new Set([
 
 export function scoreImpactRisk(input: ImpactRiskInput): ImpactRiskResult {
   const unusedAxes = input.unusedAxes ?? [];
-  const observedRisk = score(countsWithUnmeasuredAxesZeroed(input));
+  const measuredCounts = countsWithUnmeasuredAxesZeroed(input);
+  const observedRisk = score(measuredCounts);
   const incompleteSample = unusedAxes.some((unused) =>
     INCOMPLETE_SAMPLE_REASONS.has(unused.reason),
   );
@@ -143,6 +177,10 @@ export function scoreImpactRisk(input: ImpactRiskInput): ImpactRiskResult {
   return {
     risk,
     riskSharedAxes: score({ ...input, processCount: 0, moduleCount: 0 }),
+    riskDrivers:
+      risk === 'CRITICAL' || risk === 'HIGH' || risk === 'MEDIUM'
+        ? driversAtLevel(measuredCounts, risk)
+        : [],
     riskScale: {
       comparableAcrossKinds: unusedAxes.length === 0,
       unusedAxes,

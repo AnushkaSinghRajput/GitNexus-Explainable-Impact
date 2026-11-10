@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Heart } from '@/lib/lucide-icons';
+import { Github } from '@/lib/lucide-icons';
 import { useAppState } from '../hooks/useAppState';
 import { useTranslation } from 'react-i18next';
 import { translateProgressMessage } from '../i18n/progress';
@@ -29,7 +29,7 @@ export const StatusBar = () => {
   }, [graph]);
 
   return (
-    <footer className="flex items-center justify-between border-t border-dashed border-border-subtle bg-deep px-5 py-2 text-[11px] text-text-muted">
+    <footer className="flex items-center justify-between border-t border-border-subtle bg-deep px-5 py-2 text-[11px] text-text-muted">
       {/* Left - Status */}
       <div className="flex items-center gap-4">
         {progress && progress.phase !== 'complete' ? (
@@ -50,20 +50,15 @@ export const StatusBar = () => {
         )}
       </div>
 
-      {/* Center - Sponsor */}
+      {/* Center - upstream attribution */}
       <a
-        href="https://github.com/sponsors/abhigyanpatwari"
+        href="https://github.com/abhigyanpatwari/GitNexus"
         target="_blank"
         rel="noopener noreferrer"
-        className="group flex cursor-pointer items-center gap-2 rounded-full border border-pink-500/20 bg-pink-500/10 px-3 py-1 transition-all duration-200 hover:scale-[1.02] hover:border-pink-500/40 hover:bg-pink-500/20"
+        className="group flex items-center gap-2 rounded-full border border-border-default bg-surface px-3 py-1 transition-colors hover:border-accent/40 hover:text-accent"
       >
-        <Heart className="h-3.5 w-3.5 animate-pulse fill-pink-500/40 text-pink-500 transition-all duration-200 group-hover:scale-110 group-hover:fill-pink-500" />
-        <span className="text-[11px] font-medium text-pink-400 transition-colors group-hover:text-pink-300">
-          {t('graph:statusBar.sponsor')}
-        </span>
-        <span className="hidden text-[10px] text-pink-300/50 italic transition-colors group-hover:text-pink-300/80 md:inline">
-          {t('graph:statusBar.sponsorHint')}
-        </span>
+        <Github className="h-3.5 w-3.5" />
+        <span className="text-[11px] font-medium">{t('graph:statusBar.builtOn')}</span>
       </a>
 
       {/* Right - Stats */}

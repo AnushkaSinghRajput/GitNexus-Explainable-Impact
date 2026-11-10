@@ -1,7 +1,7 @@
 {
   "tabs": {
     "overview": "概览",
-    "ai": "Nexus AI",
+    "ai": "ImpactLens AI",
     "shortcuts": "快捷键",
     "status": "状态栏",
     "graph": "图谱与节点",
@@ -43,20 +43,20 @@
     "explained": "状态栏说明"
   },
   "tryAsking": "可以尝试问：",
-  "footer": "GitNexus — 图谱浏览器",
+  "footer": "ImpactLens — 基于 GitNexus 构建",
   "title": "帮助与参考",
-  "footerLong": "GitNexus — 开源代码库图谱浏览器",
+  "footerLong": "ImpactLens — 基于 GitNexus 的可解释代码影响分析",
   "docsGithub": "文档与 GitHub ↗",
   "overview": {
     "gettingStarted": "开始使用",
-    "whatIsTitle": "GitNexus 是什么？",
-    "whatIsDescription": "GitNexus 是代码库的交互式图谱浏览器。每个文件、函数和导入关系都会变成可探索、可查询、可视化导航的节点。",
+    "whatIsTitle": "ImpactLens 是什么？",
+    "whatIsDescription": "ImpactLens 基于 GitNexus 提供可解释的影响分析，并可交互式探索代码关系图。",
     "currentRepoTitle": "当前仓库",
     "loadedCounts": "已加载：{{nodeCount}} 个节点 · {{edgeCount}} 条边",
     "threeWaysTitle": "三种探索方式",
     "wayInspect": "点击节点查看详情",
     "waySearch": "按名称或类型搜索",
-    "wayAsk": "向 Nexus AI 提出自然语言问题",
+    "wayAsk": "向 ImpactLens AI 提出自然语言问题",
     "navigationTitle": "导航",
     "navZoom": "滚动缩放",
     "navPan": "点击并拖动进行平移",
@@ -82,15 +82,15 @@
     }
   },
   "ai": {
-    "title": "Nexus AI",
+    "title": "ImpactLens AI",
     "semanticReady": "✓ 语义索引就绪",
-    "description": "仓库已完成索引，可进行语义查询。Nexus AI 理解代码结构和关系，而不只是文件名。",
+    "description": "仓库已完成索引，可进行语义查询。ImpactLens AI 使用代码结构和关系，而不只是文件名。",
     "questions": {
       "dependencies": "“哪些文件依赖 auth 模块？”",
       "circular": "“找出这个仓库中的循环依赖”",
       "connected": "“哪些组件连接最密集？”",
       "imports": "“显示所有导入 useEffect 的文件”"
     },
-    "openPrompt": "点击右上角的 Nexus AI 按钮打开提问面板。"
+    "openPrompt": "点击右上角的 ImpactLens AI 按钮打开提问面板。"
   }
 }

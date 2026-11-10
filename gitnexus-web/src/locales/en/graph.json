@@ -1,7 +1,6 @@
 {
   "statusBar": {
-    "sponsor": "Sponsor",
-    "sponsorHint": "need to buy some API credits to run SWE-bench 😅"
+    "builtOn": "Built on GitNexus"
   },
   "loading": {
     "filesProgress": "{{processed}} / {{total}} files"

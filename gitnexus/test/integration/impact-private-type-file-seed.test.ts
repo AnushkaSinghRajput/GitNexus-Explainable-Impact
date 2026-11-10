@@ -131,6 +131,20 @@ withTestLbugDB(
       expect(result.impactedCount).toBe(2);
       expect(result.summary.direct).toBe(1);
       expect(result.risk).toBe('LOW');
+      expect(result.byDepth[2][0].evidencePath).toEqual([
+        {
+          fromId: 'Interface:src/lib/svc.ts:Entry',
+          toId: 'Function:src/lib/svc.ts:parse',
+          relationType: 'USES',
+          reversed: true,
+        },
+        {
+          fromId: 'Function:src/lib/svc.ts:parse',
+          toId: 'Function:src/lib/svc.ts:verify',
+          relationType: 'CALLS',
+          reversed: true,
+        },
+      ]);
     });
 
     it('keeps the file seed for an exported interface of the same file', async () => {
@@ -144,6 +158,20 @@ withTestLbugDB(
         Array.from({ length: ROUTE_COUNT }, (_, index) => `File:src/app/v${index}/route.ts`).sort(),
       );
       expect(result.impactedCount).toBe(ROUTE_COUNT);
+      expect(result.byDepth[1][0].evidencePath).toEqual([
+        {
+          fromId: 'Interface:src/lib/svc.ts:Options',
+          toId: 'File:src/lib/svc.ts',
+          relationType: 'DEFINES',
+          implicitSeed: true,
+        },
+        {
+          fromId: 'File:src/lib/svc.ts',
+          toId: 'File:src/app/v0/route.ts',
+          relationType: 'IMPORTS',
+          reversed: true,
+        },
+      ]);
     });
 
     it('preserves downstream file dependencies even for a private type', async () => {

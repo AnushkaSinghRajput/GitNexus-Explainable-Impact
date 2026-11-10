@@ -31,6 +31,7 @@ export { scoreImpactRisk, unusedAxesForImpactWalk } from './impact-risk.js';
 export type {
   ImpactRisk,
   ImpactRiskAxis,
+  ImpactRiskDriver,
   ImpactRiskInput,
   ImpactRiskResult,
   UnusedImpactRiskAxis,

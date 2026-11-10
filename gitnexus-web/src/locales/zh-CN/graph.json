@@ -1,7 +1,6 @@
 {
   "statusBar": {
-    "sponsor": "赞助",
-    "sponsorHint": "需要买点 API 额度跑 SWE-bench 😅"
+    "builtOn": "基于 GitNexus 构建"
   },
   "loading": {
     "filesProgress": "{{processed}} / {{total}} 个文件"

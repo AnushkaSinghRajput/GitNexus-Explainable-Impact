@@ -74,6 +74,7 @@ withTestLbugDB(
       });
 
       expect(file.impactedCount).toBe(13);
+      expect(file.evidenceBreakdown.directByRelation).toEqual({ IMPORTS: 13 });
       expect(file.risk).toBe('MEDIUM');
       expect(file.riskSharedAxes).toBe('MEDIUM');
       expect(file.target.type).toBe('File');
@@ -93,6 +94,7 @@ withTestLbugDB(
       expect(file.riskNote).toBeUndefined();
 
       expect(fn.impactedCount).toBe(2);
+      expect(fn.evidenceBreakdown.directByRelation).toEqual({ CALLS: 2 });
       expect(fn.risk).toBe('HIGH');
       expect(fn.riskSharedAxes).toBe('LOW');
       expect(fn.summary.processes_affected).toBe(4);

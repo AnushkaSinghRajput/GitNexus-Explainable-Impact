@@ -31,7 +31,7 @@
   },
   "analyzeFirst": {
     "title": "Analyze your first repository",
-    "description": "Paste a repository URL and GitNexus will clone it, parse the code, and build a live knowledge graph — right in your browser.",
+    "description": "Paste a repository URL. ImpactLens uses GitNexus to index its code and reveal the relationships behind a change.",
     "footer": "Public repos only · Cloned locally by the server · No data leaves your machine"
   },
   "landing": {

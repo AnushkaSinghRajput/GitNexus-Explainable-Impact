@@ -4,7 +4,6 @@ import {
   HelpCircle,
   Sparkles,
   Github,
-  Star,
   FolderOpen,
   ChevronDown,
   Trash2,
@@ -176,15 +175,20 @@ export const Header = ({
   };
 
   return (
-    <header className="flex items-center justify-between border-b border-dashed border-border-subtle bg-deep px-5 py-3">
+    <header className="flex items-center justify-between border-b border-border-subtle bg-deep/95 px-5 py-3 shadow-[0_1px_0_rgba(64,211,190,0.08)]">
       {/* Left section */}
       <div className="flex items-center gap-4">
-        {/* Logo */}
+        {/* ImpactLens identity; the analysis engine remains GitNexus. */}
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-accent to-node-interface text-sm font-bold text-white shadow-glow">
-            ◇
-          </div>
-          <span className="text-[15px] font-semibold tracking-tight">GitNexus</span>
+          <span className="impact-mark" aria-hidden="true" />
+          <span className="flex flex-col leading-none">
+            <span className="text-[15px] font-semibold tracking-tight text-text-primary">
+              Impact<span className="text-accent">Lens</span>
+            </span>
+            <span className="mt-1 hidden text-[9px] font-medium tracking-[0.16em] text-text-muted uppercase md:block">
+              Built on GitNexus
+            </span>
+          </span>
         </div>
 
         {/* Project badge + repo dropdown */}
@@ -528,17 +532,15 @@ export const Header = ({
 
       {/* Right section */}
       <div className="flex items-center gap-2">
-        {/* GitHub Star Button */}
+        {/* Project source */}
         <a
-          href="https://github.com/abhigyanpatwari/GitNexus"
+          href="https://github.com/AnushkaSinghRajput/GitNexus-Explainable-Impact"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 px-3.5 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:from-purple-500 hover:to-pink-500 hover:shadow-xl"
+          className="group flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-3.5 py-2 text-sm font-medium text-accent transition-all duration-200 hover:border-accent/60 hover:bg-accent/15"
         >
           <Github className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('header:starIfCool')}</span>
-          <Star className="h-3.5 w-3.5 transition-all group-hover:fill-yellow-300 group-hover:text-yellow-300" />
-          <span className="hidden sm:inline">✨</span>
+          <span className="hidden sm:inline">{t('header:viewSource')}</span>
         </a>
 
         {/* Stats — hidden in chat-only mode, where the empty-but-non-null graph

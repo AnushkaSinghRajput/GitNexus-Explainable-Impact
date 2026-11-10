@@ -31,7 +31,7 @@
   },
   "analyzeFirst": {
     "title": "分析你的第一个仓库",
-    "description": "粘贴仓库 URL，GitNexus 会克隆仓库、解析代码，并直接在浏览器中构建实时知识图谱。",
+    "description": "粘贴仓库 URL。ImpactLens 使用 GitNexus 索引代码，并展示代码变更背后的关联。",
     "footer": "仅支持公开仓库 · 服务器本地克隆 · 数据不会离开你的机器"
   },
   "landing": {

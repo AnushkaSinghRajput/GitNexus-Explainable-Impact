@@ -174,6 +174,25 @@ UPSTREAM (what depends on this):
 
 Options: `maxDepth`, `minConfidence`, `relationTypes` (`CALLS`, `IMPORTS`, `EXTENDS`, `IMPLEMENTS`), `includeTests`, `limit` (max symbols per depth, default 100), `offset` (pagination start per depth), `summaryOnly` (counts and risk only, omits symbol list)
 
+**Why this result?** `riskDrivers` names the observed count and threshold behind
+the primary `risk` label (for example, `[{"axis":"processes","observed":4,"threshold":3}]`
+for HIGH). It is empty for LOW and UNKNOWN; use `riskNote` to understand an
+UNKNOWN result. Each returned `byDepth` symbol includes `evidencePath`, one
+deterministic chain from the target to that symbol. Steps contain `fromId`,
+`toId`, and `relationType`. `reversed: true` means the underlying graph edge
+points from `toId` to `fromId`, as in an upstream CALLS traversal.
+`implicitSeed: true` marks an internal expansion,
+such as entering a type's owning File before following IMPORTS. It is not an
+observed dependency edge. Paths are representative graph witnesses, not an
+exhaustive list of dependencies or a guarantee that a change will break the
+symbol. `summaryOnly` retains risk drivers but omits paths; pagination and
+response budgets retain paths only for returned symbols. The CLI prints both
+the drivers and each returned symbol's path. `evidenceBreakdown` retains
+`directByRelation` and `allByRelation` counts even in `summaryOnly` mode, so an
+import-heavy result can be distinguished from direct calls at a glance. Each
+symbol is counted once under its selected BFS relation; the counts are not a
+complete inventory of all edges or a correction to the existing risk score.
+
 **Disambiguation** — when several symbols share the target name, `impact` returns a ranked `ambiguous` candidate list instead of guessing. Narrow it with `target_uid` (exact, zero-ambiguity), `file_path`, or `kind` (`Function`, `Class`, `Method`, …). From the CLI these are `--uid`, `--file`, and `--kind`, matching `gitnexus context`:
 
 ```bash

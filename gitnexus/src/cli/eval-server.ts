@@ -306,6 +306,21 @@ function pushCallgraphRiskLines(lines: string[], result: any): void {
   if (result.risk) {
     lines.push(`Risk: ${result.risk}`);
   }
+  if (Array.isArray(result.riskDrivers) && result.riskDrivers.length > 0) {
+    lines.push(
+      `Why: ${result.riskDrivers
+        .map((driver: { axis: string; observed: number; threshold: number }) =>
+          `${driver.axis} ${driver.observed} ≥ ${driver.threshold}`,
+        )
+        .join('; ')}`,
+    );
+  }
+  if (result.evidenceBreakdown?.directByRelation) {
+    const direct = Object.entries(result.evidenceBreakdown.directByRelation)
+      .map(([relation, count]) => `${relation} ${count}`)
+      .join(', ');
+    if (direct) lines.push(`Direct evidence: ${direct}`);
+  }
   if (result.riskNote) {
     lines.push(String(result.riskNote));
   }
@@ -660,6 +675,27 @@ export function formatImpactResult(result: any): string {
           lines.push(
             `  ${item.type} ${item.name} → ${item.filePath} [${item.relationType}]${conf}`,
           );
+          if (Array.isArray(item.evidencePath) && item.evidencePath.length > 0) {
+            const path = item.evidencePath as Array<{
+              fromId: string;
+              toId: string;
+              relationType: string;
+              implicitSeed?: boolean;
+              reversed?: boolean;
+            }>;
+            lines.push(
+              `    via ${path[0].fromId}${path
+                .map(
+                  (step) =>
+                    step.implicitSeed
+                      ? ` --${step.relationType} (seed)-- ${step.toId}`
+                      : step.reversed
+                        ? ` <--${step.relationType}-- ${step.toId}`
+                        : ` --${step.relationType}--> ${step.toId}`,
+                )
+                .join('')}`,
+            );
+          }
         }
         if (trueCount > shown) {
           lines.push(`  ... and ${trueCount - shown} more`);

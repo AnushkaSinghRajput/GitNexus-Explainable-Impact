@@ -557,3 +557,47 @@ describe('formatImpactResult — callgraph rendering is UNCHANGED (regression gu
     expect(out).not.toContain('PDG');
   });
 });
+
+describe('formatImpactResult — explainable callgraph', () => {
+  it('renders the risk threshold and a representative path when provided', () => {
+    const out = formatImpactResult({
+      target: { kind: 'Interface', name: 'Options' },
+      direction: 'upstream',
+      impactedCount: 1,
+      risk: 'MEDIUM',
+      riskDrivers: [{ axis: 'direct', observed: 5, threshold: 5 }],
+      evidenceBreakdown: { directByRelation: { IMPORTS: 1 }, allByRelation: { IMPORTS: 1 } },
+      byDepthCounts: { 1: 1 },
+      byDepth: {
+        1: [
+          {
+            type: 'File',
+            name: 'route.ts',
+            filePath: 'src/route.ts',
+            relationType: 'IMPORTS',
+            confidence: 1,
+            evidencePath: [
+              {
+                fromId: 'Interface:Options',
+                toId: 'File:options.ts',
+                relationType: 'DEFINES',
+                implicitSeed: true,
+              },
+              {
+                fromId: 'File:options.ts',
+                toId: 'File:src/route.ts',
+                relationType: 'IMPORTS',
+                reversed: true,
+              },
+            ],
+          },
+        ],
+      },
+    });
+    expect(out).toContain('Why: direct 5 ≥ 5');
+    expect(out).toContain('Direct evidence: IMPORTS 1');
+    expect(out).toContain(
+      'Interface:Options --DEFINES (seed)-- File:options.ts <--IMPORTS-- File:src/route.ts',
+    );
+  });
+});
